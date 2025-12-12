@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Адия Қаздойбы - Қазақ Шашкасы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Marck+Script&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: clamp(1.5em, 4vw, 2.5em);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+        }
+
+        /* Орнату экраны */
+        .setup {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .setup.hidden { display: none; }
+        .setup h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: clamp(1.3em, 3vw, 1.8em);
+        }
+        .player-config {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            border: 3px solid #ddd;
+        }
+        .player-config label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: clamp(1em, 2vw, 1.2em);
+        }
+        .player-config select {
+            width: 100%;
+            padding: 10px;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            background: white;
+            cursor: pointer;
+        }
+        .btn-start {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: clamp(1.1em, 2.5vw, 1.5em);
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Ойын экраны */
+        .game { display: none; }
+        .game.active { display: block; }
+
+        /* Ойыншылар блоктары */
+        .players-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .player-box {
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 4px solid transparent;
+        }
+        .player-box.blue {
+            background: linear-gradient(135deg, #667eea 0%, #4c63d2 100%);
+        }
+        .player-box.black {
+            background: linear-gradient(135deg, #434343 0%, #000000 100%);
+        }
+        .player-box.red {
+            background: linear-gradient(135deg, #f5576c 0%, #d63447 100%);
+        }
+        .player-box.white {
+            background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+            color: #333;
+        }
+        .player-box.active {
+            border: 4px solid gold;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            transform: scale(1.05);
+        }
+        .player-box div {
+            margin: 5px 0;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+        }
+
+        /* Тақта */
+        .board-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+        .board-container { 
+            display: inline-block;
+            margin: 0 auto;
+        }
+        .board-labels-top {
+            display: flex;
+            margin-bottom: 3px;
+            padding-left: var(--label-width);
+        }
+        .board-labels-top span {
+            width: var(--cell-size);
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: var(--label-font);
+        }
+        .board-with-left-labels {
+            display: flex;
+        }
+        .board-labels-left, .board-labels-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        .board-labels-left { margin-right: 3px; }
+        .board-labels-right { margin-left: 3px; }
+        .board-labels-left span,
+        .board-labels-right span {
+            height: var(--cell-size);
+            width: var(--label-width);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ff8c00;
+            font-size: var(--label-font);
+        }
+
+        /* CSS переменные для адаптивности */
+        :root {
+            --cell-size: 45px;
+            --label-width: 35px;
+            --label-font: 1em;
+            --corner-font: 14px;
+            --piece-size: 36px;
+        }
+
+        @media (max-width: 1200px) {
+            :root {
+                --cell-size: 38px;
+                --label-width: 30px;
+                --label-font: 0.95em;
+                --corner-font: 12px;
+                --piece-size: 30px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            :root {
+                --cell-size: 32px;
+                --label-width: 26px;
+                --label-font: 0.85em;
+                --corner-font: 10px;
+                --piece-size: 25px;
+            }
+            .players-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --cell-size: 26px;
+                --label-width: 22px;
+                --label-font: 0.75em;
+                --corner-font: 8px;
+                --piece-size: 20px;
+            }
+            .container {
+                padding: 10px;
+            }
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(12, var(--cell-size));
+            grid-template-rows: repeat(12, var(--cell-size));
+            gap: 0;
+            border: 4px solid #ff8c00;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .cell.light { background: rgb(255, 255, 0); }
+        .cell.dark  { background: rgb(255, 165, 0); }
+        .cell.oob   { background: rgb(255, 255, 255); overflow: visible; }
+
+        .cell.selected {
+            background-color: rgba(255, 255, 0, 0.4) !important;
+            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.9);
+        }
+        .cell.possible {
+            background-color: rgba(173, 216, 230, 0.6) !important;
+            box-shadow: inset 0 0 8px rgba(50, 205, 50, 0.7);
+        }
+        .cell.capture {
+            background-color: rgba(255, 100, 100, 0.6) !important;
+            box-shadow: inset 0 0 8px rgba(255, 105, 180, 0.7);
+        }
+
+        /* Бұрыштағы жазулар */
+        .corner-text {
+            position: absolute;
+            font-family: 'Marck Script', cursive;
+            font-size: var(--corner-font);
+            font-weight: 700;
+            color: #0050c8;
+            pointer-events: none;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.9);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center center;
+            left: 0 !important;
+            top: 0 !important;
+        }
+        
+        /* Горизонталь (2 клетка) */
+        .corner-text.horiz {
+            width: calc(var(--cell-size) * 2);
+            height: var(--cell-size);
+        }
+        
+        /* Вертикаль (2 клетка) */
+        .corner-text.vert {
+            width: var(--cell-size);
+            height: calc(var(--cell-size) * 2);
+            writing-mode: vertical-rl;
+        }
+        
+        /* Жеке клетка - АДИЯ */
+        .corner-text.single {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            font-size: calc(var(--corner-font) * 0.85);
+        }
+
+        /* ТӨМЕНГІ ОҢ БҰРЫШ */
+        /* T2+T1 = Қаздойба (вертикаль) - 180° */
+        .cell[data-row="10"][data-col="11"] .corner-text.vert {
+            transform: rotate(180deg) !important;
+            transform-origin: center center;
+        }
+        
+        /* ЖОҒАРҒЫ ОҢ БҰРЫШ */
+        /* T11 = Адия - 270° (кері қарап) */
+        .cell[data-row="1"][data-col="11"] .corner-text.single {
+            transform: rotate(270deg) !important;
+            transform-origin: center center;
+        }
+        /* S12+T12 = Қаздойба (горизонталь) - 180° */
+        .cell[data-row="0"][data-col="10"] .corner-text.horiz {
+            transform: rotate(180deg) !important;
+            transform-origin: center center;
+        }
+        
+        /* ЖОҒАРҒЫ СОЛ БҰРЫШ */
+        /* B12 = Адия - 180° */
+        .cell[data-row="0"][data-col="1"] .corner-text.single {
+            transform: rotate(180deg) !important;
+            transform-origin: center center;
+        }
+        
+        /* ТӨМЕНГІ СОЛ БҰРЫШ */
+        /* A2 = Адия - 90° */
+        .cell[data-row="10"][data-col="0"] .corner-text.single {
+            transform: rotate(90deg) !important;
+            transform-origin: center center;
+        }
+
+        /* Тастар */
+        .piece {
+            width: var(--piece-size);
+            height: var(--piece-size);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 0.9em;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.6);
+            z-index: 10;
+            position: relative;
+        }
+        .piece:hover { transform: translateY(-2px) scale(1.05); }
+
+        .piece.blue {
+            background: radial-gradient(circle at 30% 25%, #9fd6ff, #0060d6);
+            border-color: #d6ecff;
+            color: #ffffff;
+        }
+        .piece.black {
+            background: radial-gradient(circle at 30% 25%, #555555, #050505);
+            border-color: #b0b0b0;
+            color: #ffffff;
+        }
+        .piece.red {
+            background: radial-gradient(circle at 30% 25%, #ffb3b3, #d00000);
+            border-color: #ffe0e0;
+            color: #ffffff;
+        }
+        .piece.white {
+            background: radial-gradient(circle at 30% 25%, #ffffff, #d0d0d0);
+            border-color: #aaaaaa;
+            color: #222;
+        }
+
+        .piece.sultan {
+            font-size: 1.1em;
+            border: 3px solid rgb(255, 215, 0);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.4), 0 0 15px rgba(255, 215, 0, 0.9);
+            animation: glow 1.5s infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+            to   { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+
+        /* Басқару */
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .status {
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            border: 3px solid #667eea;
+        }
+        .btn {
+            padding: 12px 25px;
+            margin: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #667eea;
+        }
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: clamp(1.1em, 2vw, 1.3em);
+        }
+        .info-box ul { margin-left: 20px; }
+        .info-box li {
+            margin: 5px 0;
+            font-size: clamp(0.9em, 1.8vw, 1.05em);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎮 Адия Қаздойбы</h1>
+    <p class="subtitle">4 ойыншы • 12x12 тақта (A B C D E F G H N P S T, 1–12)</p>
+
+    <div class="setup" id="setup">
+        <h2>⚙️ Ойын параметрлері</h2>
+        <div class="player-config">
+            <label>🔵 Көк ойыншы:</label>
+            <select id="blueType">
+                <option value="human">👤 Адам</option>
+                <option value="ai-easy">🤖 AI (Жеңіл)</option>
+                <option value="ai-medium">🤖 AI (Орта)</option>
+                <option value="ai-hard">🤖 AI (Қиын)</option>
+            </select>
+        </div>
+        <div class="player-config">
+            <label>⚫ Қара ойыншы:</label>
+            <select id="blackType">
+                <option value="human">👤 Адам</option>
+                <option value="ai-easy">🤖 AI (Жеңіл)</option>
+                <option value="ai-medium" selected>🤖 AI (Орта)</option>
+                <option value="ai-hard">🤖 AI (Қиын)</option>
+            </select>
+        </div>
+        <div class="player-config">
+            <label>🔴 Қызыл ойыншы:</label>
+            <select id="redType">
+                <option value="human">👤 Адам</option>
+                <option value="ai-easy">🤖 AI (Жеңіл)</option>
+                <option value="ai-medium" selected>🤖 AI (Орта)</option>
+                <option value="ai-hard">🤖 AI (Қиын)</option>
+            </select>
+        </div>
+        <div class="player-config">
+            <label>⚪ Ақ ойыншы:</label>
+            <select id="whiteType">
+                <option value="human">👤 Адам</option>
+                <option value="ai-easy" selected>🤖 AI (Жеңіл)</option>
+                <option value="ai-medium">🤖 AI (Орта)</option>
+                <option value="ai-hard">🤖 AI (Қиын)</option>
+            </select>
+        </div>
+        <button class="btn-start" onclick="startGame()">🎮 Ойынды бастау</button>
+
+        <div class="info-box">
+            <h3>📋 Қысқаша ережелер</h3>
+            <ul>
+                <li>Тақта 12×12, 4 түсті ойыншы.</li>
+                <li>Кезек: Көк → Қара → Қызыл → Ақ.</li>
+                <li>Жою міндетті, көп реттік соққы жасауға болады.</li>
+                <li>Шетке жеткен тас – Сұлтан 👑.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="game" id="game">
+        <div class="players-info" id="playersInfo"></div>
+
+        <div class="board-wrapper">
+            <div class="board-container">
+                <div class="board-labels-top" id="topLabels"></div>
+                <div class="board-with-left-labels">
+                    <div class="board-labels-left" id="leftLabels"></div>
+                    <div class="board" id="board"></div>
+                    <div class="board-labels-right" id="rightLabels"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="status" id="status">Кезек: BLUE</div>
+            <button class="btn" onclick="restartGame()">🔄 Қайта бастау</button>
+            <button class="btn" onclick="showHint()">💡 Кеңес</button>
+            <button class="btn" onclick="showRules()">📖 Ережелер</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BOARD_ROWS = 12;
+    const BOARD_COLS = 12;
+
+    const ROW_MAP = {};
+    for (let i = 1; i <= BOARD_ROWS; i++) {
+        ROW_MAP[i] = BOARD_ROWS - i;
+    }
+    const COL_MAP = {
+        'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5,
+        'G': 6, 'H': 7, 'N': 8, 'P': 9, 'S': 10, 'T': 11
+    };
+    const colLabels = Object.keys(COL_MAP);
+    const rowLabels = Array.from({length: BOARD_ROWS}, (_, i) => BOARD_ROWS - i);
+
+    const OOB_SQUARES = [
+        [ROW_MAP[1], COL_MAP['A']], [ROW_MAP[2], COL_MAP['A']], [ROW_MAP[1], COL_MAP['B']],
+        [ROW_MAP[1], COL_MAP['S']], [ROW_MAP[1], COL_MAP['T']], [ROW_MAP[2], COL_MAP['T']],
+        [ROW_MAP[12], COL_MAP['A']], [ROW_MAP[11], COL_MAP['A']], [ROW_MAP[12], COL_MAP['B']],
+        [ROW_MAP[12], COL_MAP['S']], [ROW_MAP[11], COL_MAP['T']], [ROW_MAP[12], COL_MAP['T']]
+    ];
+
+    const STARTING_POSITIONS = {
+        'blue': [
+            [ROW_MAP[1], COL_MAP['C']], [ROW_MAP[1], COL_MAP['E']], [ROW_MAP[1], COL_MAP['G']], [ROW_MAP[1], COL_MAP['N']],
+            [ROW_MAP[2], COL_MAP['D']], [ROW_MAP[2], COL_MAP['F']], [ROW_MAP[2], COL_MAP['H']], [ROW_MAP[2], COL_MAP['P']]
+        ],
+        'black': [
+            [ROW_MAP[4], COL_MAP['T']], [ROW_MAP[6], COL_MAP['T']], [ROW_MAP[8], COL_MAP['T']], [ROW_MAP[10], COL_MAP['T']],
+            [ROW_MAP[3], COL_MAP['S']], [ROW_MAP[5], COL_MAP['S']], [ROW_MAP[7], COL_MAP['S']], [ROW_MAP[9], COL_MAP['S']]
+        ],
+        'red': [
+            [ROW_MAP[12], COL_MAP['P']], [ROW_MAP[12], COL_MAP['H']], [ROW_MAP[12], COL_MAP['F']], [ROW_MAP[12], COL_MAP['D']],
+            [ROW_MAP[11], COL_MAP['N']], [ROW_MAP[11], COL_MAP['G']], [ROW_MAP[11], COL_MAP['E']], [ROW_MAP[11], COL_MAP['C']]
+        ],
+        'white': [
+            [ROW_MAP[3], COL_MAP['A']], [ROW_MAP[5], COL_MAP['A']], [ROW_MAP[7], COL_MAP['A']], [ROW_MAP[9], COL_MAP['A']],
+            [ROW_MAP[4], COL_MAP['B']], [ROW_MAP[6], COL_MAP['B']], [ROW_MAP[8], COL_MAP['B']], [ROW_MAP[10], COL_MAP['B']]
+        ]
+    };
+
+    const PAWN_FORWARD_MOVES = {
+        'blue': [[-1, -1], [-1, 1]],
+        'black': [[-1, -1], [1, -1]],
+        'red': [[1, -1], [1, 1]],
+        'white': [[-1, 1], [1, 1]]
+    };
+    const ALL_DIRECTIONS = [[-1,-1],[-1,1],[1,-1],[1,1]];
+    const PROMOTION_LINES = { 'blue':0, 'black':0, 'red':11, 'white':11 };
+    const TURN_ORDER = ['blue','black','red','white'];
+
+    class Piece {
+        constructor(row,col,player){ this.row=row; this.col=col; this.player=player; this.isSultan=false; }
+        promote(){ this.isSultan=true; }
+    }
+
+    class KazdoibaGame {
+        constructor(){
+            this.board=this._setupBoard();
+            this.turnIndex=0;
+            this.currentPlayer=TURN_ORDER[this.turnIndex];
+            this.selectedPiece=null;
+            this.validMoves={};
+            this.mandatoryCaptures={};
+            this.inMultiJump=false;
+            this.capturedInTurn=new Set();
+            this.activePlayers=[...TURN_ORDER];
+            this.playerPiecesCount=TURN_ORDER.reduce((a,p)=>{a[p]=STARTING_POSITIONS[p].length;return a;},{});
+            this.winner=null;
+            this.playerTypes={
+                blue: document.getElementById('blueType').value,
+                black: document.getElementById('blackType').value,
+                red: document.getElementById('redType').value,
+                white: document.getElementById('whiteType').value
+            };
+            this._findAllMandatoryCaptures();
+            this.updateBoard();
+            this.updateHud();
+            if(this.playerTypes[this.currentPlayer]!=='human'){
+                setTimeout(()=>this.makeAiMove(),500);
+            }
+        }
+        _setupBoard(){
+            const b=Array.from({length:BOARD_ROWS},()=>Array(BOARD_COLS).fill(null));
+            for(const p in STARTING_POSITIONS){
+                for(const [r,c] of STARTING_POSITIONS[p]){
+                    b[r][c]=new Piece(r,c,p);
+                }
+            }
+            return b;
+        }
+        _is_valid_pos(r,c){
+            return r>=0 && r<BOARD_ROWS && c>=0 && c<BOARD_COLS &&
+                   !OOB_SQUARES.some(([rr,cc])=>rr===r && cc===c);
+        }
+        getPiece(r,c){ return this._is_valid_pos(r,c)? this.board[r][c]:null; }
+
+        updateBoard(){
+            const cells=document.querySelectorAll('.cell');
+            cells.forEach(cell=>{
+                const r=parseInt(cell.dataset.row);
+                const c=parseInt(cell.dataset.col);
+                // КРИТИКАЛЫҚ: Тек piece класы бар балаларды жоямыз
+                Array.from(cell.children).forEach(ch=>{
+                    if(ch.classList.contains('piece')){
+                        ch.remove();
+                    }
+                });
+                cell.classList.remove('selected','possible','capture');
+                const piece=this.getPiece(r,c);
+                if(piece){
+                    const d=document.createElement('div');
+                    d.classList.add('piece',piece.player);
+                    if(piece.isSultan){
+                        d.classList.add('sultan');
+                        d.textContent='👑';
+                    }
+                    cell.appendChild(d);
+                }
+            });
+            if(this.selectedPiece){
+                const cell=document.querySelector(
+                    `[data-row="${this.selectedPiece.row}"][data-col="${this.selectedPiece.col}"]`
+                );
+                if(cell) cell.classList.add('selected');
+            }
+            for(const key in this.validMoves){
+                const [r,c]=key.split(',').map(Number);
+                const cell=document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if(!cell) continue;
+                if(this.validMoves[key].length>0) cell.classList.add('capture');
+                else cell.classList.add('possible');
+            }
+            
+            // Жазуларды бұрамаймыз - олар қатып қалады
+        }
+
+        updateHud(){
+            const status=document.getElementById('status');
+            if(this.winner){
+                status.textContent=`ЖЕҢІМПАЗ: ${this.winner.toUpperCase()}`;
+            } else {
+                status.textContent=`Кезек: ${this.currentPlayer.toUpperCase()}`;
+                if(Object.keys(this.mandatoryCaptures).length>0 && !this.inMultiJump){
+                    status.textContent+=' | МІНДЕТТІ ЖОЮ БАР!';
+                }
+            }
+            const boxes=document.querySelectorAll('.player-box');
+            boxes.forEach(b=>{
+                b.classList.remove('active');
+                if(b.dataset.player===this.currentPlayer) b.classList.add('active');
+                const cnt=b.querySelector('.count');
+                if(cnt) cnt.textContent=`Тастар: ${this.playerPiecesCount[b.dataset.player]}`;
+            });
+        }
+
+        handleClick(r,c){
+            if(this.winner) return;
+            if(this.playerTypes[this.currentPlayer]!=='human') return;
+            if(!this._is_valid_pos(r,c)) return;
+            const moveKey=`${r},${c}`;
+            if(moveKey in this.validMoves){
+                const jumped=this.validMoves[moveKey];
+                this._movePiece(this.selectedPiece,r,c,jumped);
+                this.updateBoard(); this.updateHud();
+                return;
+            }
+            const p=this.getPiece(r,c);
+            if(p && p.player===this.currentPlayer){
+                if(this.inMultiJump) return;
+                const key=`${r},${c}`;
+                if(Object.keys(this.mandatoryCaptures).length>0 && !(key in this.mandatoryCaptures)) return;
+                this._selectPiece(p);
+                this.updateBoard();
+                return;
+            }
+            if(!this.inMultiJump){
+                this._unselectPiece();
+                this.updateBoard();
+            }
+        }
+
+        _selectPiece(p){
+            this.selectedPiece=p;
+            if(this.inMultiJump){
+                this.validMoves=this._findCapturesForPiece(p,this.capturedInTurn);
+            } else {
+                const key=`${p.row},${p.col}`;
+                if(Object.keys(this.mandatoryCaptures).length>0){
+                    this.validMoves=this.mandatoryCaptures[key]||{};
+                } else {
+                    this.validMoves=this._findSimpleMovesForPiece(p);
+                }
+            }
+        }
+        _unselectPiece(){ this.selectedPiece=null; this.validMoves={}; }
+
+        _findAllMandatoryCaptures(){
+            let all={}, maxCapt=0;
+            for(let r=0;r<BOARD_ROWS;r++){
+                for(let c=0;c<BOARD_COLS;c++){
+                    const p=this.getPiece(r,c);
+                    if(p && p.player===this.currentPlayer){
+                        const caps=this._findCapturesForPiece(p,new Set());
+                        if(Object.keys(caps).length){
+                            const pieceMax=Math.max(...Object.values(caps).map(j=>j.length));
+                            maxCapt=Math.max(maxCapt,pieceMax);
+                            all[`${r},${c}`]=caps;
+                        }
+                    }
+                }
+            }
+            this.mandatoryCaptures={};
+            for(const pos in all){
+                const caps=all[pos];
+                const filtered={};
+                for(const land in caps){
+                    if(caps[land].length===maxCapt) filtered[land]=caps[land];
+                }
+                if(Object.keys(filtered).length) this.mandatoryCaptures[pos]=filtered;
+            }
+        }
+
+        _findCapturesForPiece(piece,capturedInSeq){
+            const moves={};
+            const dfs=(r,c,path,capSet)=>{
+                let found=false;
+                if(piece.isSultan){
+                    for(const [dr,dc] of ALL_DIRECTIONS){
+                        let jumped=null;
+                        for(let i=1;i<BOARD_ROWS;i++){
+                            const nr=r+i*dr, nc=c+i*dc;
+                            if(!this._is_valid_pos(nr,nc)) break;
+                            const pc=this.getPiece(nr,nc);
+                            if(pc){
+                                const k=`${nr},${nc}`;
+                                if(capSet.has(k) || pc.player===this.currentPlayer) break;
+                                if(!jumped && !capSet.has(k)){
+                                    jumped=[nr,nc]; continue;
+                                }
+                                if(jumped) break;
+                            }
+                            if(jumped){
+                                const landKey=`${nr},${nc}`;
+                                if(capSet.has(landKey)) continue;
+                                found=true;
+                                const newSet=new Set(capSet);
+                                newSet.add(`${jumped[0]},${jumped[1]}`);
+                                const newPath=[...path,[nr,nc]];
+                                dfs(nr,nc,newPath,newSet);
+                            }
+                        }
+                    }
+                } else {
+                    for(const [dr,dc] of ALL_DIRECTIONS){
+                        const jr=r+dr, jc=c+dc;
+                        const lr=r+2*dr, lc=c+2*dc;
+                        const landKey=`${lr},${lc}`;
+                        if(!this._is_valid_pos(lr,lc) || capSet.has(landKey)) continue;
+                        const jp=this.getPiece(jr,jc);
+                        const lp=this.getPiece(lr,lc);
+                        const jumpedKey=`${jr},${jc}`;
+                        if(jp && jp.player!==this.currentPlayer && !capSet.has(jumpedKey) && !lp){
+                            found=true;
+                            const newSet=new Set(capSet);
+                            newSet.add(jumpedKey);
+                            const newPath=[...path,[lr,lc]];
+                            dfs(lr,lc,newPath,newSet);
+                        }
+                    }
+                }
+                if(!found && path.length>1){
+                    const last=path[path.length-1];
+                    const key=`${last[0]},${last[1]}`;
+                    const allJumped=Array.from(capSet)
+                        .filter(s=>!capturedInSeq.has(s))
+                        .map(s=>s.split(',').map(Number));
+                    if(!(key in moves) || allJumped.length>moves[key].length){
+                        moves[key]=allJumped;
+                    }
+                }
+            };
+            dfs(piece.row,piece.col,[[piece.row,piece.col]],new Set([...capturedInSeq]));
+            return moves;
+        }
+
+        _findSimpleMovesForPiece(p){
+            const moves={};
+            if(p.isSultan){
+                for(const [dr,dc] of ALL_DIRECTIONS){
+                    for(let i=1;i<BOARD_ROWS;i++){
+                        const r=p.row+i*dr, c=p.col+i*dc;
+                        if(!this._is_valid_pos(r,c)) break;
+                        if(this.getPiece(r,c)===null) moves[`${r},${c}`]=[];
+                        else break;
+                    }
+                }
+            } else {
+                for(const [dr,dc] of PAWN_FORWARD_MOVES[p.player]){
+                    const r=p.row+dr, c=p.col+dc;
+                    if(this._is_valid_pos(r,c) && this.getPiece(r,c)===null){
+                        moves[`${r},${c}`]=[];
+                    }
+                }
+            }
+            return moves;
+        }
+
+        _movePiece(p,nr,nc,jumped){
+            this.board[p.row][p.col]=null;
+            p.row=nr; p.col=nc;
+            this.board[nr][nc]=p;
+            const isCap=jumped.length>0;
+            if(isCap){
+                jumped.forEach(([jr,jc])=>this.capturedInTurn.add(`${jr},${jc}`));
+            }
+            if(!p.isSultan){
+                const pl=p.player;
+                if(((pl==='blue'||pl==='red') && p.row===PROMOTION_LINES[pl]) ||
+                   ((pl==='black'||pl==='white') && p.col===PROMOTION_LINES[pl])){
+                    p.promote();
+                }
+            }
+            if(isCap){
+                this._selectPiece(p);
+                if(Object.keys(this.validMoves).length>0){
+                    this.inMultiJump=true;
+                    return;
+                }
+            }
+            this._endTurn();
+        }
+
+        _endTurn(){
+            this.capturedInTurn.forEach(s=>{
+                const [r,c]=s.split(',').map(Number);
+                const p=this.board[r][c];
+                if(p) this.playerPiecesCount[p.player]--;
+                this.board[r][c]=null;
+            });
+            this._unselectPiece();
+            this.inMultiJump=false;
+            this.capturedInTurn=new Set();
+
+            this.activePlayers=this.activePlayers.filter(p=>this.playerPiecesCount[p]>0);
+            if(this.activePlayers.length<=1){
+                this.winner=this.activePlayers[0]||null;
+                this.updateHud();
+                return;
+            }
+            let next=(this.turnIndex+1)%TURN_ORDER.length;
+            while(true){
+                this.turnIndex=next;
+                this.currentPlayer=TURN_ORDER[this.turnIndex];
+                if(!this.activePlayers.includes(this.currentPlayer)){
+                    next=(next+1)%TURN_ORDER.length;
+                    continue;
+                }
+                this._findAllMandatoryCaptures();
+                if(Object.keys(this.mandatoryCaptures).length>0 || this._checkAnySimple()){
+                    break;
+                } else {
+                    this.activePlayers=this.activePlayers.filter(p=>p!==this.currentPlayer);
+                    if(this.activePlayers.length<=1){
+                        this.winner=this.activePlayers[0]||null;
+                        this.updateHud();
+                        break;
+                    }
+                }
+                next=(next+1)%TURN_ORDER.length;
+            }
+            this.updateHud();
+            if(this.playerTypes[this.currentPlayer]!=='human'){
+                setTimeout(()=>this.makeAiMove(),500);
+            }
+        }
+
+        _checkAnySimple(){
+            for(let r=0;r<BOARD_ROWS;r++){
+                for(let c=0;c<BOARD_COLS;c++){
+                    const p=this.getPiece(r,c);
+                    if(p && p.player===this.currentPlayer){
+                        if(Object.keys(this._findSimpleMovesForPiece(p)).length>0) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        makeAiMove(){
+            if(this.winner) return;
+            const level=this.playerTypes[this.currentPlayer].split('-')[1]||'easy';
+            const chooseMax=(level==='medium'||level==='hard');
+
+            if(this.inMultiJump){
+                if(Object.keys(this.validMoves).length===0) return;
+                const keys=Object.keys(this.validMoves);
+                let moveKey;
+                if(chooseMax){
+                    const maxLen=Math.max(...Object.values(this.validMoves).map(j=>j.length));
+                    const cand=keys.filter(k=>this.validMoves[k].length===maxLen);
+                    moveKey=cand[Math.floor(Math.random()*cand.length)];
+                } else {
+                    moveKey=keys[Math.floor(Math.random()*keys.length)];
+                }
+                const [r,c]=moveKey.split(',').map(Number);
+                const jumped=this.validMoves[moveKey];
+                this._movePiece(this.selectedPiece,r,c,jumped);
+                this.updateBoard(); this.updateHud();
+                if(this.inMultiJump) setTimeout(()=>this.makeAiMove(),500);
+                return;
+            }
+
+            let selectedKey, moveKey, jumped=[];
+            if(Object.keys(this.mandatoryCaptures).length>0){
+                const pkeys=Object.keys(this.mandatoryCaptures);
+                selectedKey=pkeys[Math.floor(Math.random()*pkeys.length)];
+                const p=this.getPiece(...selectedKey.split(',').map(Number));
+                this._selectPiece(p);
+                const mkeys=Object.keys(this.validMoves);
+                if(chooseMax){
+                    const maxLen=Math.max(...Object.values(this.validMoves).map(j=>j.length));
+                    const cand=mkeys.filter(k=>this.validMoves[k].length===maxLen);
+                    moveKey=cand[Math.floor(Math.random()*cand.length)];
+                } else {
+                    moveKey=mkeys[Math.floor(Math.random()*mkeys.length)];
+                }
+                jumped=this.validMoves[moveKey];
+            } else {
+                const allSimple={};
+                for(let r=0;r<BOARD_ROWS;r++){
+                    for(let c=0;c<BOARD_COLS;c++){
+                        const p=this.getPiece(r,c);
+                        if(p && p.player===this.currentPlayer){
+                            const m=this._findSimpleMovesForPiece(p);
+                            if(Object.keys(m).length>0) allSimple[`${r},${c}`]=m;
+                        }
+                    }
+                }
+                if(Object.keys(allSimple).length===0){
+                    this._endTurn(); this.updateBoard(); this.updateHud();
+                    return;
+                }
+                const pkeys=Object.keys(allSimple);
+                selectedKey=pkeys[Math.floor(Math.random()*pkeys.length)];
+                const p=this.getPiece(...selectedKey.split(',').map(Number));
+                this._selectPiece(p);
+                const mkeys=Object.keys(this.validMoves);
+                moveKey=mkeys[Math.floor(Math.random()*mkeys.length)];
+            }
+            const [r,c]=moveKey.split(',').map(Number);
+            const p=this.getPiece(...selectedKey.split(',').map(Number));
+            this._movePiece(p,r,c,jumped);
+            this.updateBoard(); this.updateHud();
+            if(this.inMultiJump) setTimeout(()=>this.makeAiMove(),500);
+        }
+    }
+
+    let game=null;
+
+    function startGame(){
+        document.getElementById('setup').classList.add('hidden');
+        document.getElementById('game').classList.add('active');
+
+        const top=document.getElementById('topLabels');
+        const left=document.getElementById('leftLabels');
+        const right=document.getElementById('rightLabels');
+
+        colLabels.forEach(l=>{
+            const s1=document.createElement('span'); s1.textContent=l; top.appendChild(s1);
+        });
+        rowLabels.forEach(l=>{
+            const s1=document.createElement('span'); s1.textContent=l; left.appendChild(s1);
+            const s2=document.createElement('span'); s2.textContent=l; right.appendChild(s2);
+        });
+
+        const boardEl=document.getElementById('board');
+        for(let r=0;r<BOARD_ROWS;r++){
+            for(let c=0;c<BOARD_COLS;c++){
+                const cell=document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.row=r; cell.dataset.col=c;
+                const isOob=OOB_SQUARES.some(([rr,cc])=>rr===r && cc===c);
+                if(isOob) cell.classList.add('oob');
+                else cell.classList.add((r+c)%2===0 ? 'light' : 'dark');
+                cell.addEventListener('click',e=>{
+                    const rr=parseInt(e.currentTarget.dataset.row);
+                    const cc=parseInt(e.currentTarget.dataset.col);
+                    game.handleClick(rr,cc);
+                });
+                boardEl.appendChild(cell);
+            }
+        }
+
+        const playersInfo=document.getElementById('playersInfo');
+        TURN_ORDER.forEach(p=>{
+            const box=document.createElement('div');
+            box.classList.add('player-box',p);
+            box.dataset.player=p;
+            box.innerHTML=`
+                <div>${p.toUpperCase()}</div>
+                <div class="type"></div>
+                <div class="count">Тастар: 8</div>`;
+            playersInfo.appendChild(box);
+        });
+
+        game=new KazdoibaGame();
+
+        // Бұрыштық жазулар
+        placeCornerText(ROW_MAP[1], COL_MAP['A'], "Қаздойба", "horiz");
+        placeCornerText(ROW_MAP[2], COL_MAP['A'], "Адия", "single");
+        
+        placeCornerText(ROW_MAP[1], COL_MAP['S'], "Адия", "single");
+        placeCornerText(ROW_MAP[2], COL_MAP['T'], "Қаздойба", "vert");
+        
+        placeCornerText(ROW_MAP[12], COL_MAP['S'], "Қаздойба", "horiz");
+        placeCornerText(ROW_MAP[11], COL_MAP['T'], "Адия", "single");
+        
+        placeCornerText(ROW_MAP[12], COL_MAP['B'], "Адия", "single");
+        placeCornerText(ROW_MAP[12], COL_MAP['A'], "Қаздойба", "vert");
+    }
+
+    function placeCornerText(row, col, text, style) {
+        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+        if (!cell) return;
+        
+        const span = document.createElement('span');
+        span.textContent = text;
+        span.className = `corner-text ${style}`;
+        cell.appendChild(span);
+    }
+
+    function restartGame(){ location.reload(); }
+    function showHint(){ alert('Кеңес: Міндетті жою жүрісін бірінші орындаңыз 😊'); }
+    function showRules(){ alert('Қысқаша ереже: жою міндетті, сұлтан шетке жеткенде пайда болады.'); }
+
+    console.log("🎮 Адия Қаздойбы жүктелді");
+</script>
+</body>
+</html>
